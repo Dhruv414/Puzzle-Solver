@@ -1,11 +1,46 @@
 import numpy as np
+from tensorflow.keras.utils import load_img, img_to_array
+
+permutations = [
+    "0123",
+    "0132",
+    "0213",
+    "0231",
+    "0312",
+    "0321",
+    "1023",
+    "1032",
+    "1203",
+    "1230",
+    "1302",
+    "1320",
+    "2013",
+    "2031",
+    "2103",
+    "2130",
+    "2301",
+    "2310",
+    "3012",
+    "3021",
+    "3102",
+    "3120",
+    "3201",
+    "3210"
+]
+
+def _img_to_array(img_path):
+    # Load the image
+    img = load_img(f'{img_path}', target_size=(128, 128))
+    # Converts the image to a 3D numpy array (128x128x3)
+    return img_to_array(img)
 
 def get_pieces(img, rows, cols, row_cut_size, col_cut_size):
     pieces = []
     for r in range(0, rows, row_cut_size):
         for c in range(0, cols, col_cut_size):
-            pieces.append(img[r:r+row_cut_size, c:c+col_cut_size, :])
+            pieces.append(img[r:r + row_cut_size, c:c + col_cut_size, :])
     return pieces
+
 
 # Splits an image into uniformly sized puzzle pieces
 def get_uniform_rectangular_split(img, puzzle_dim_x, puzzle_dim_y):
@@ -19,3 +54,52 @@ def get_uniform_rectangular_split(img, puzzle_dim_x, puzzle_dim_y):
     pieces = get_pieces(img, rows, cols, row_cut_size, col_cut_size)
 
     return pieces
+
+def permute_img(img, permutation):
+    order = [int(x) for x in permutation]
+    pieces = get_uniform_rectangular_split(img, 2, 2)
+    return np.vstack((np.hstack((pieces[order[0]], pieces[order[1]])), np.hstack((pieces[order[2]], pieces[order[3]]))))
+
+def color_error(img, row1, col1, row2, col2):
+    diff = [(img[row1][col1][i] - img[row2][col2][i]) ** 2 for i in range(3)]
+    return sum(diff)
+
+# Given an image, outputs the number of regions based on some tolerance for color rgb
+# uses bfs
+def get_number_regions(img, TOLERANCE):
+    from collections import deque
+
+    dirs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+    def in_bounds(x, y):
+        return 0 <= x < img.shape[0] and 0 <= y < img.shape[1]
+
+    rows = img.shape[0]
+    cols = img.shape[1]
+    g = [[0 for x in range(rows)] for y in range(cols)]
+    visited = [[False for x in range(rows)] for y in range(cols)]
+
+    regions = 0
+    for row in range(rows):
+        for col in range(cols):
+            if not visited[row][col]:
+                visited[row][col] = True
+                q = deque()
+                q.append((row, col))
+                regions += 1
+
+                while q:
+                    r, c = q.popleft()
+                    g[r][c] = regions
+                    for dr, dc in dirs:
+                        nr = r + dr
+                        nc = c + dc
+                        if in_bounds(nr, nc) and color_error(img, r, c, nr, nc) <= TOLERANCE and not visited[nr][nc]:
+                            visited[nr][nc] = True
+                            q.append((nr, nc))
+
+    print("-" * 10)
+    for row in g:
+        print(row)
+    print("-" * 10)
+    return regions
