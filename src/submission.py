@@ -12,6 +12,7 @@ from tensorflow.keras.utils import load_img, img_to_array
 
 # Import helper functions from utils.py
 import utils
+import edge_heuristic
 
 class Predictor:
     """
@@ -43,24 +44,37 @@ class Predictor:
         """
 
         # Load the image
-        img = load_img(f'{img_path}', target_size=(128, 128))
+        # img = load_img(f'{img_path}', target_size=(128, 128))
+
+        arr = utils._img_to_array(img_path)
+
+        v = [0] * 24
+        ve = utils.permute_all(arr)
+        for i in range(len(ve)):
+            v[i] = edge_heuristic.edge_heuristic(ve[i])
+
+        return utils.permutations[np.argmin(v)]
+
+        # i1f_ = utils.permute_img(arr, "3333")
+        # i1f = Image.fromarray((i1f_ * 255).astype(np.uint8))
+        # i1f.show()
 
         # Converts the image to a 3D numpy array (128x128x3)
-        img_array = img_to_array(img)
+        # img_array = img_to_array(img)
 
         # Convert from (128x128x3) to (Nonex128x128x3), for tensorflow
-        img_tensor = np.expand_dims(img_array, axis=0)
+        # img_tensor = np.expand_dims(img_array, axis=0)
 
         # Preform a prediction on this image using a pre-trained model (you should make your own model :))
-        prediction = self.model.predict(img_tensor, verbose=False)
+        # prediction = self.model.predict(img_tensor, verbose=False)
 
         # The example model was trained to return the percent chance that the input image is scrambled using 
         # each one of the 24 possible permutations for a 2x2 puzzle
-        combs = [''.join(str(x) for x in comb) for comb in list(permutations(range(0, 4)))]
+        # combs = [''.join(str(x) for x in comb) for comb in list(permutations(range(0, 4)))]
 
         # Return the combination that the example model thinks is the solution to this puzzle
         # Example return value: `3120`
-        return combs[np.argmax(prediction)]
+        # return combs[np.argmax(prediction)]
 
 # Example main function for testing/development
 # Run this file using `python3 submission.py`
@@ -68,22 +82,11 @@ if __name__ == '__main__':
 
     for img_name in glob('example_images/*'):
         # Open an example image using the PIL library
-        example_image = Image.open(img_name)
-        # debug
-        arr = utils._img_to_array(img_name)
-        print(type(arr))
-        print(arr.shape)
+        predictor = Predictor()
+        pred = predictor.make_prediction(img_name)
 
-        arr2 = np.asarray(example_image)
-        print(type(arr2))
-        print(arr2.shape)
+        print(pred)
 
-        i1 = Image.fromarray(arr2)
-        i1.show()
-        i1f_ = utils.permute_img(arr, "0123")
-        i1f = Image.fromarray(np.asarray(i1f_))
-        i1f.show()
-        break
         '''
         arr = utils._img_to_array(img_name)
         print("error between first two cells is ", utils.color_error(arr, 0, 0, 0, 1))
