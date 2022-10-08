@@ -83,5 +83,5 @@ if __name__ == '__main__':
         # Visualize the image
         pieces = utils.get_uniform_rectangular_split(np.asarray(example_image), 2, 2)
         # Example images are all shuffled in the "3120" order
-        final_image = Image.fromarray(np.vstack((np.hstack((pieces[3], pieces[1])), np.hstack((pieces[2], pieces[0])))))
+        final_image = Image.fromarray(np.vstack((np.hstack((pieces[3], pieces[1])),np.hstack((pieces[2], pieces[0])))))
         final_image.show()
