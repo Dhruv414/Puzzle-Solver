@@ -115,7 +115,7 @@ for permutation_folder in glob(train_data_path):
 def calculate_accuracy(predictions, labels):
   return sum(p == l for p, l in zip(predictions, labels)) / len(labels)
 
-# StratifiedKFold used because 
+# StratifiedKFold used because we want proportions of permutations to be similar in training and testing
 sfk = StratifiedKFold(n_splits=5, shuffle=True, random_state = 1) # random_state for reproducibility
 for train, test in sfk.split(X, y):
   # X holds the file_paths, y is the file_folder they're in(true permutation)
