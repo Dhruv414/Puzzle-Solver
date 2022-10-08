@@ -12,8 +12,6 @@ from tensorflow.keras.utils import load_img, img_to_array
 
 # Import helper functions from utils.py
 import utils
-import edge_heuristic
-
 
 class Predictor:
     """
@@ -49,7 +47,6 @@ class Predictor:
 
         # Converts the image to a 3D numpy array (128x128x3)
         img_array = img_to_array(img)
-        val = edge_heuristic.edge_heuristic(img_array)
 
         # Convert from (128x128x3) to (Nonex128x128x3), for tensorflow
         img_tensor = np.expand_dims(img_array, axis=0)
@@ -65,7 +62,6 @@ class Predictor:
         # Example return value: `3120`
         return combs[np.argmax(prediction)]
 
-
 # Example main function for testing/development
 # Run this file using `python3 submission.py`
 if __name__ == '__main__':
@@ -73,6 +69,27 @@ if __name__ == '__main__':
     for img_name in glob('example_images/*'):
         # Open an example image using the PIL library
         example_image = Image.open(img_name)
+        # debug
+        arr = utils._img_to_array(img_name)
+        print(type(arr))
+        print(arr.shape)
+
+        arr2 = np.asarray(example_image)
+        print(type(arr2))
+        print(arr2.shape)
+
+        i1 = Image.fromarray(arr2)
+        i1.show()
+        i1f_ = utils.permute_img(arr, "0123")
+        i1f = Image.fromarray(np.asarray(i1f_))
+        i1f.show()
+        break
+        '''
+        arr = utils._img_to_array(img_name)
+        print("error between first two cells is ", utils.color_error(arr, 0, 0, 0, 1))
+        print(arr[0][0])
+        print(arr[0][1])
+        print(utils.get_number_regions(arr, 2000))
 
         # Use instance of the Predictor class to predict the correct order of the current example image
         predictor = Predictor()
@@ -85,3 +102,4 @@ if __name__ == '__main__':
         # Example images are all shuffled in the "3120" order
         final_image = Image.fromarray(np.vstack((np.hstack((pieces[3],pieces[1])),np.hstack((pieces[2],pieces[0])))))
         final_image.show()
+        '''
