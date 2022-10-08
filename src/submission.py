@@ -12,6 +12,7 @@ from tensorflow.keras.utils import load_img, img_to_array
 
 # Import helper functions from utils.py
 import utils
+import edge_heuristic
 
 class Predictor:
     """
@@ -71,19 +72,14 @@ if __name__ == '__main__':
         example_image = Image.open(img_name)
         # debug
         arr = utils._img_to_array(img_name)
-        print(type(arr))
-        print(arr.shape)
-
-        arr2 = np.asarray(example_image)
-        print(type(arr2))
-        print(arr2.shape)
-
-        i1 = Image.fromarray(arr2)
-        i1.show()
-        i1f_ = utils.permute_img(arr, "0123")
-        i1f = Image.fromarray(np.asarray(i1f_))
-        i1f.show()
-        break
+        i = Image.fromarray(arr)
+        i.show()
+        for p in utils.permutations:
+            parr = utils.permute_img(arr, p)
+            # Image.fromarray(parr).show()
+            print(p, utils.get_number_regions(arr, TOLERANCE=20000))
+            # print(p, edge_heuristic.edge_heuristic(parr))
+        # break
         '''
         arr = utils._img_to_array(img_name)
         print("error between first two cells is ", utils.color_error(arr, 0, 0, 0, 1))
