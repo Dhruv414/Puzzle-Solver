@@ -99,18 +99,22 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 
 # !unzip train.zip -d "/content/drive/MyDrive/Datathon/train"
 
-train_data_path = "/content/drive/MyDrive/Datathon/train/*"
-size = 50000
-X = np.array([""]*size, dtype=object) # 50000 - # of training samples
-y = np.array([""]*size, dtype=object)
+train_data_path = "/content/drive/MyDrive/Datathon/train/train/*"
+X = []
+y = []
 
-i = 0
 for permutation_folder in glob(train_data_path):
+  print(permutation_folder)
   permutation = permutation_folder[-4:]
   for file_path in glob(permutation_folder+"/*"):
-    X[i] = file_path # /content/drive/MyDrive/Datathon/train/2031/00000.png
-    y[i] = permutation # 2031
-    i += 1
+    X.append(file_path) # /content/drive/MyDrive/Datathon/train/2031/00000.png
+    y.append(permutation) # 2031
+
+X = np.array(X, dtype=object)
+y = np.array(y, dtype=object)
+
+print(len(X), len(y))
+print(X[:25])
 
 def calculate_accuracy(predictions, labels):
   return sum(p == l for p, l in zip(predictions, labels)) / len(labels)
