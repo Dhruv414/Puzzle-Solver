@@ -32,7 +32,7 @@ def _img_to_array(img_path):
     # Load the image
     img = load_img(f'{img_path}', target_size=(128, 128))
     # Converts the image to a 3D numpy array (128x128x3)
-    return img_to_array(img)
+    return np.asarray(img)
 
 def get_pieces(img, rows, cols, row_cut_size, col_cut_size):
     pieces = []
