@@ -76,6 +76,29 @@ def color_error(img, row1, col1, row2, col2):
     return sum(diff)
 
 
+def get_filtered_permutations(img, K = 1):
+    mp = {}
+    lst = set()
+    # dictionary from int to list of strings
+    curr_min = 128 * 128 * 5
+    for p in permutations:
+        arr = permute_img(img, p)
+        num_regions = get_number_regions(arr, TOLERANCE=6000)
+        lst.add(num_regions)
+        if num_regions not in mp:
+            mp[num_regions] = []
+        mp[num_regions].append(p)
+    lst = list(lst)
+    lst.sort()
+    ret = []
+    for i in range(min(K, len(lst))):
+        # which region # to use
+        nreg = lst[i]
+        for p in mp[nreg]:
+            ret.append(p)
+    return ret
+
+
 # Given an image, outputs the number of regions based on some tolerance for color rgb
 # uses bfs
 def get_number_regions(img, TOLERANCE):

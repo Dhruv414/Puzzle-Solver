@@ -31,10 +31,13 @@ class Predictor:
     def make_prediction(self, img_path):
         arr = utils._img_to_array(img_path)
 
-        v = [0] * 24
         ve = utils.permute_all(arr)
-        for i in range(len(ve)):
-            v[i] = edge_heuristic.edge_heuristic(ve[i])
+        pos = utils.get_filtered_permutations(arr, 3)
+        print(pos)
+        v = [0] * len(pos)
+        for h in range(len(pos)):
+            fl = utils.permute_img(arr, pos[h])
+            v[h] = edge_heuristic.edge4_heuristic(fl)
 
         # print(utils.get_number_regions(arr, TOLERANCE=20000))
 
@@ -42,7 +45,7 @@ class Predictor:
         perm_img = Image.fromarray((perm_arr * 255).astype(np.uint8))
 
         # perm_img.show()
-        return utils.permutations[np.argmin(v)][::-1]
+        return pos[np.argmin(v)]
 
 
 # Example main function for testing/development
@@ -51,13 +54,17 @@ if __name__ == '__main__':
     i = 0
     g = 0
     ANS = "3210"
+    LIMIT = 30
+    SHOULD_STOP = True
 
     for img_name in glob('3210/*'):
+        if i == LIMIT and SHOULD_STOP:
+            break
         predictor = Predictor()
         pred = predictor.make_prediction(img_name)
         if pred == ANS:
             g = g + 1
-        # print(pred)
+        print("img:", img_name, "pred:", pred)
         i = i + 1
 
     print("SUCCESS:", g)
