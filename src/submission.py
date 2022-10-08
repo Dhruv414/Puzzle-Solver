@@ -14,6 +14,7 @@ from tensorflow.keras.utils import load_img, img_to_array
 import utils
 import edge_heuristic
 
+
 class Predictor:
     """
     DO NOT RENAME THIS CLASS
@@ -28,24 +29,6 @@ class Predictor:
         self.model = load_model('example_model.h5')
 
     def make_prediction(self, img_path):
-        """
-        DO NOT RENAME THIS FUNCTION
-        This function enables automated judging
-        This function should stay named as `make_prediction(self, img_path)`
-
-        INPUT:
-            img_path: 
-                A string representing the path to an RGB image with dimensions 128x128
-                example: `example_images/1.png`
-        
-        OUTPUT:
-            A 4-character string representing how to re-arrange the input image to solve the puzzle
-            example: `3120`
-        """
-
-        # Load the image
-        # img = load_img(f'{img_path}', target_size=(128, 128))
-
         arr = utils._img_to_array(img_path)
 
         v = [0] * 24
@@ -53,56 +36,25 @@ class Predictor:
         for i in range(len(ve)):
             v[i] = edge_heuristic.edge_heuristic(ve[i])
 
+        perm_arr = utils.permute_img(arr, utils.permutations[np.argmin(v)])
+        perm_img = Image.fromarray((perm_arr * 255).astype(np.uint8))
+
+        perm_img.show()
         return utils.permutations[np.argmin(v)]
 
-        # i1f_ = utils.permute_img(arr, "3333")
-        # i1f = Image.fromarray((i1f_ * 255).astype(np.uint8))
-        # i1f.show()
-
-        # Converts the image to a 3D numpy array (128x128x3)
-        # img_array = img_to_array(img)
-
-        # Convert from (128x128x3) to (Nonex128x128x3), for tensorflow
-        # img_tensor = np.expand_dims(img_array, axis=0)
-
-        # Preform a prediction on this image using a pre-trained model (you should make your own model :))
-        # prediction = self.model.predict(img_tensor, verbose=False)
-
-        # The example model was trained to return the percent chance that the input image is scrambled using 
-        # each one of the 24 possible permutations for a 2x2 puzzle
-        # combs = [''.join(str(x) for x in comb) for comb in list(permutations(range(0, 4)))]
-
-        # Return the combination that the example model thinks is the solution to this puzzle
-        # Example return value: `3120`
-        # return combs[np.argmax(prediction)]
 
 # Example main function for testing/development
 # Run this file using `python3 submission.py`
 if __name__ == '__main__':
 
-    for img_name in glob('example_images/*'):
+    i = 0
+    for img_name in glob('images/*'):
         # Open an example image using the PIL library
+        if i == 10:
+            break
         predictor = Predictor()
         pred = predictor.make_prediction(img_name)
 
         print(pred)
 
-        '''
-        arr = utils._img_to_array(img_name)
-        print("error between first two cells is ", utils.color_error(arr, 0, 0, 0, 1))
-        print(arr[0][0])
-        print(arr[0][1])
-        print(utils.get_number_regions(arr, 2000))
-
-        # Use instance of the Predictor class to predict the correct order of the current example image
-        predictor = Predictor()
-        prediction = predictor.make_prediction(img_name)
-        # Example images are all shuffled in the "3120" order
-        print(prediction)
-
-        # Visualize the image
-        pieces = utils.get_uniform_rectangular_split(np.asarray(example_image), 2, 2)
-        # Example images are all shuffled in the "3120" order
-        final_image = Image.fromarray(np.vstack((np.hstack((pieces[3],pieces[1])),np.hstack((pieces[2],pieces[0])))))
-        final_image.show()
-        '''
+        i = i + 1
