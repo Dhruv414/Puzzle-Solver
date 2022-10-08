@@ -28,11 +28,13 @@ permutations = [
     "3210"
 ]
 
+
 def _img_to_array(img_path):
     # Load the image
     img = load_img(f'{img_path}', target_size=(128, 128))
     # Converts the image to a 3D numpy array (128x128x3)
     return np.asarray(img_to_array(img))
+
 
 def get_pieces(img, rows, cols, row_cut_size, col_cut_size):
     pieces = []
@@ -55,10 +57,12 @@ def get_uniform_rectangular_split(img, puzzle_dim_x, puzzle_dim_y):
 
     return pieces
 
+
 def permute_img(img, permutation):
     order = [int(x) for x in permutation]
     pieces = get_uniform_rectangular_split(img, 2, 2)
     return np.vstack((np.hstack((pieces[order[0]], pieces[order[1]])), np.hstack((pieces[order[2]], pieces[order[3]]))))
+
 
 def permute_all(img):
     v = [0] * len(permutations)
@@ -66,9 +70,11 @@ def permute_all(img):
         v[i] = permute_img(img, permutations[i])
     return v
 
+
 def color_error(img, row1, col1, row2, col2):
     diff = [(img[row1][col1][i] - img[row2][col2][i]) ** 2 for i in range(3)]
     return sum(diff)
+
 
 # Given an image, outputs the number of regions based on some tolerance for color rgb
 # uses bfs
@@ -104,8 +110,8 @@ def get_number_regions(img, TOLERANCE):
                             visited[nr][nc] = True
                             q.append((nr, nc))
 
-    print("-" * 10)
-    for row in g:
-        print(row)
-    print("-" * 10)
+    # print("-" * 10)
+    # for row in g:
+    #     print(row)
+    # print("-" * 10)
     return regions

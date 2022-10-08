@@ -36,25 +36,30 @@ class Predictor:
         for i in range(len(ve)):
             v[i] = edge_heuristic.edge_heuristic(ve[i])
 
+        # print(utils.get_number_regions(arr, TOLERANCE=20000))
+
         perm_arr = utils.permute_img(arr, utils.permutations[np.argmin(v)])
         perm_img = Image.fromarray((perm_arr * 255).astype(np.uint8))
 
-        perm_img.show()
-        return utils.permutations[np.argmin(v)]
+        # perm_img.show()
+        return utils.permutations[np.argmin(v)][::-1]
 
 
 # Example main function for testing/development
 # Run this file using `python3 submission.py`
 if __name__ == '__main__':
-
     i = 0
-    for img_name in glob('images/*'):
-        # Open an example image using the PIL library
-        if i == 10:
-            break
+    g = 0
+    ANS = "3210"
+
+    for img_name in glob('3210/*'):
         predictor = Predictor()
         pred = predictor.make_prediction(img_name)
-
-        print(pred)
-
+        if pred == ANS:
+            g = g + 1
+        # print(pred)
         i = i + 1
+
+    print("SUCCESS:", g)
+    print("OUT OF:", i)
+    print("RATE:", g / i)
