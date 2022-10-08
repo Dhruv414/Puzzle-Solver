@@ -12,6 +12,8 @@ from tensorflow.keras.utils import load_img, img_to_array
 
 # Import helper functions from utils.py
 import utils
+import edge_heuristic
+
 
 class Predictor:
     """
@@ -47,6 +49,7 @@ class Predictor:
 
         # Converts the image to a 3D numpy array (128x128x3)
         img_array = img_to_array(img)
+        val = edge_heuristic.edge_heuristic(img_array)
 
         # Convert from (128x128x3) to (Nonex128x128x3), for tensorflow
         img_tensor = np.expand_dims(img_array, axis=0)
@@ -61,6 +64,7 @@ class Predictor:
         # Return the combination that the example model thinks is the solution to this puzzle
         # Example return value: `3120`
         return combs[np.argmax(prediction)]
+
 
 # Example main function for testing/development
 # Run this file using `python3 submission.py`
@@ -79,5 +83,5 @@ if __name__ == '__main__':
         # Visualize the image
         pieces = utils.get_uniform_rectangular_split(np.asarray(example_image), 2, 2)
         # Example images are all shuffled in the "3120" order
-        final_image = Image.fromarray(np.vstack((np.hstack((pieces[3],pieces[1])),np.hstack((pieces[2],pieces[0])))))
+        final_image = Image.fromarray(np.vstack((np.hstack((pieces[3], pieces[1])), np.hstack((pieces[2], pieces[0])))))
         final_image.show()
