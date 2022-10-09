@@ -83,7 +83,7 @@ def get_filtered_permutations(img, K = 1):
     curr_min = 128 * 128 * 5
     for p in permutations:
         arr = permute_img(img, p)
-        num_regions = get_number_regions(arr, TOLERANCE=6000)
+        num_regions = get_number_regions(arr, TOLERANCE=1000)
         lst.add(num_regions)
         if num_regions not in mp:
             mp[num_regions] = []

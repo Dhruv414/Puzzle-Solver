@@ -32,7 +32,7 @@ class Predictor:
 
 
     def make_prediction(self, img_path):
-        BOUND = 2000
+        LOWER_BOUND = 5000
         arr = utils._img_to_array(img_path)
 
         ve = utils.permute_all(arr)
@@ -43,7 +43,7 @@ class Predictor:
             fl = utils.permute_img(arr, pos[h])
             c = edge_heuristic.edge4_heuristic(fl)
             print(c)
-            if c <= BOUND:
+            if c <= LOWER_BOUND:
                 v[h] = sys.maxsize
             else:
                 v[h] = c
@@ -63,11 +63,11 @@ class Predictor:
 if __name__ == '__main__':
     i = 0
     g = 0
-    ANS = "3210"
+    ANS = "1302"
     LIMIT = 30
     SHOULD_STOP = True
 
-    for img_name in glob('3210/*'):
+    for img_name in glob('images/*'):
         if i == LIMIT and SHOULD_STOP:
             break
         predictor = Predictor()
