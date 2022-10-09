@@ -133,8 +133,4 @@ def get_number_regions(img, TOLERANCE):
                             visited[nr][nc] = True
                             q.append((nr, nc))
 
-    # print("-" * 10)
-    # for row in g:
-    #     print(row)
-    # print("-" * 10)
     return regions

@@ -3,6 +3,8 @@
 # This file should stay named as `submission.py`
 
 # Import Python Libraries
+import sys
+
 import numpy as np
 from glob import glob
 from PIL import Image
@@ -28,23 +30,31 @@ class Predictor:
         """
         self.model = load_model('example_model.h5')
 
+
     def make_prediction(self, img_path):
+        BOUND = 2000
         arr = utils._img_to_array(img_path)
 
         ve = utils.permute_all(arr)
-        pos = utils.get_filtered_permutations(arr, 3)
+        pos = utils.get_filtered_permutations(arr, 2)
         print(pos)
         v = [0] * len(pos)
         for h in range(len(pos)):
             fl = utils.permute_img(arr, pos[h])
-            v[h] = edge_heuristic.edge4_heuristic(fl)
+            c = edge_heuristic.edge4_heuristic(fl)
+            print(c)
+            if c <= BOUND:
+                v[h] = sys.maxsize
+            else:
+                v[h] = c
+
 
         # print(utils.get_number_regions(arr, TOLERANCE=20000))
 
-        perm_arr = utils.permute_img(arr, utils.permutations[np.argmin(v)])
+        perm_arr = utils.permute_img(arr, pos[np.argmin(v)])
         perm_img = Image.fromarray((perm_arr * 255).astype(np.uint8))
 
-        # perm_img.show()
+        perm_img.show()
         return pos[np.argmin(v)]
 
 
