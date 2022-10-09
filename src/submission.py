@@ -3,6 +3,8 @@
 # This file should stay named as `submission.py`
 
 # Import Python Libraries
+from time import perf_counter
+
 import numpy as np
 from glob import glob
 from PIL import Image
@@ -12,7 +14,14 @@ from tensorflow.keras.utils import load_img, img_to_array
 
 # Import helper functions from utils.py
 import utils
+import edge_heuristic
 
+"""
+DO NOT RENAME THIS CLASS
+This class enables automated judging
+This class should stay named as `Predictor`
+"""
+from time import perf_counter
 class Predictor:
     """
     DO NOT RENAME THIS CLASS
@@ -20,86 +29,46 @@ class Predictor:
     This class should stay named as `Predictor`
     """
 
-    def __init__(self):
-        """
-        Initializes any variables to be used when making predictions
-        """
-        self.model = load_model('example_model.h5')
-
     def make_prediction(self, img_path):
-        """
-        DO NOT RENAME THIS FUNCTION
-        This function enables automated judging
-        This function should stay named as `make_prediction(self, img_path)`
+        BOUND = 500
+        arr = utils._img_to_array(img_path)
 
-        INPUT:
-            img_path: 
-                A string representing the path to an RGB image with dimensions 128x128
-                example: `example_images/1.png`
-        
-        OUTPUT:
-            A 4-character string representing how to re-arrange the input image to solve the puzzle
-            example: `3120`
-        """
+        t1 = perf_counter()
+        ve = [(edge_heuristic.edge_heuristic(perm_arr), perm) for perm_arr, perm in
+              zip(utils.permute_all(arr), utils.permutations)]
+        ve = [(score, perm) for score, perm in ve if score > BOUND]
+        ve = sorted(ve)[:9]  # Get the top 9 scores
 
-        # Load the image
-        img = load_img(f'{img_path}', target_size=(128, 128))
+        t2 = perf_counter()
+        pos = utils.get_filtered_permutations(arr, K=2, TOL=100, PERMUTATIONS=[b for a, b in ve])
 
-        # Converts the image to a 3D numpy array (128x128x3)
-        img_array = img_to_array(img)
+        v = [0] * len(pos)
+        for h in range(len(pos)):
+            fl = utils.permute_img(arr, pos[h])
+            c = edge_heuristic.edge_heuristic(fl)
 
-        # Convert from (128x128x3) to (Nonex128x128x3), for tensorflow
-        img_tensor = np.expand_dims(img_array, axis=0)
-
-        # Preform a prediction on this image using a pre-trained model (you should make your own model :))
-        prediction = self.model.predict(img_tensor, verbose=False)
-
-        # The example model was trained to return the percent chance that the input image is scrambled using 
-        # each one of the 24 possible permutations for a 2x2 puzzle
-        combs = [''.join(str(x) for x in comb) for comb in list(permutations(range(0, 4)))]
-
-        # Return the combination that the example model thinks is the solution to this puzzle
-        # Example return value: `3120`
-        return combs[np.argmax(prediction)]
+        print(min(v), pos[np.argmin(v)])
+        return pos[np.argmin(v)]
 
 # Example main function for testing/development
 # Run this file using `python3 submission.py`
 if __name__ == '__main__':
+    i = 0
+    g = 0
+    ANS = "1302"
+    LIMIT = 5
+    SHOULD_STOP = False
 
     for img_name in glob('example_images/*'):
-        # Open an example image using the PIL library
-        example_image = Image.open(img_name)
-        # debug
-        arr = utils._img_to_array(img_name)
-        print(type(arr))
-        print(arr.shape)
-
-        arr2 = np.asarray(example_image)
-        print(type(arr2))
-        print(arr2.shape)
-
-        i1 = Image.fromarray(arr2)
-        i1.show()
-        i1f_ = utils.permute_img(arr, "0123")
-        i1f = Image.fromarray(np.asarray(i1f_))
-        i1f.show()
-        break
-        '''
-        arr = utils._img_to_array(img_name)
-        print("error between first two cells is ", utils.color_error(arr, 0, 0, 0, 1))
-        print(arr[0][0])
-        print(arr[0][1])
-        print(utils.get_number_regions(arr, 2000))
-
-        # Use instance of the Predictor class to predict the correct order of the current example image
+        if i == LIMIT and SHOULD_STOP:
+            break
         predictor = Predictor()
-        prediction = predictor.make_prediction(img_name)
-        # Example images are all shuffled in the "3120" order
-        print(prediction)
+        pred = predictor.make_prediction(img_name)
+        if pred == ANS:
+            g = g + 1
+        print("img:", img_name, "pred:", pred)
+        i = i + 1
 
-        # Visualize the image
-        pieces = utils.get_uniform_rectangular_split(np.asarray(example_image), 2, 2)
-        # Example images are all shuffled in the "3120" order
-        final_image = Image.fromarray(np.vstack((np.hstack((pieces[3],pieces[1])),np.hstack((pieces[2],pieces[0])))))
-        final_image.show()
-        '''
+    print("SUCCESS:", g)
+    print("OUT OF:", i)
+    print("RATE:", g / i)

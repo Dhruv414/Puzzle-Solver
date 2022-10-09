@@ -1,5 +1,6 @@
 import numpy as np
 from tensorflow.keras.utils import load_img, img_to_array
+from collections import defaultdict
 
 permutations = [
     "0123",
@@ -98,8 +99,28 @@ def get_number_regions(img, TOLERANCE):
                             visited[nr][nc] = True
                             q.append((nr, nc))
 
-    print("-" * 10)
-    for row in g:
-        print(row)
-    print("-" * 10)
     return regions
+
+def get_filtered_permutations(img, K = 1, TOL=1000, PERMUTATIONS=permutations):
+    mp = defaultdict(list)
+    lst = set()
+    # dictionary from int to list of strings
+    for p in PERMUTATIONS:
+        arr = permute_img(img, p)
+        num_regions = get_number_regions(arr, TOLERANCE=TOL)
+        lst.add(num_regions)
+        mp[num_regions].append(p)
+    lst = sorted(lst)
+    ret = []
+    for i in range(min(K, len(lst))):
+        # which region # to use
+        nreg = lst[i]
+        for p in mp[nreg]:
+            ret.append(p)
+    return ret
+
+def permute_all(img):
+    v = [0]*len(permutations)
+    for i in range(len(permutations)):
+        v[i] = permute_img(img, permutations[i])
+    return v
