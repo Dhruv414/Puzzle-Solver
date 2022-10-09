@@ -1,5 +1,6 @@
 import numpy as np
 from tensorflow.keras.utils import load_img, img_to_array
+import edge_heuristic
 
 permutations = [
     "0123",
@@ -76,14 +77,13 @@ def color_error(img, row1, col1, row2, col2):
     return sum(diff)
 
 
-def get_filtered_permutations(img, K = 1):
+def get_filtered_permutations(img, K=1):
     mp = {}
     lst = set()
     # dictionary from int to list of strings
-    curr_min = 128 * 128 * 5
     for p in permutations:
         arr = permute_img(img, p)
-        num_regions = get_number_regions(arr, TOLERANCE=1000)
+        num_regions = get_number_regions(arr, TOLERANCE=850)
         lst.add(num_regions)
         if num_regions not in mp:
             mp[num_regions] = []
@@ -92,6 +92,50 @@ def get_filtered_permutations(img, K = 1):
     lst.sort()
     ret = []
     for i in range(min(K, len(lst))):
+        # which region # to use
+        nreg = lst[i]
+        for p in mp[nreg]:
+            ret.append(p)
+    return ret
+
+
+def get_filtered_permutations_from_arr(pos_perms, img, K=1):
+    mp = {}
+    lst = set()
+    # dictionary from int to list of strings
+    for p in pos_perms:
+        arr = permute_img(img, p)
+        num_regions = get_number_regions(arr, TOLERANCE=850)
+        lst.add(num_regions)
+        if num_regions not in mp:
+            mp[num_regions] = []
+        mp[num_regions].append(p)
+    lst = list(lst)
+    lst.sort()
+    ret = []
+    for i in range(min(K, len(lst))):
+        # which region # to use
+        nreg = lst[i]
+        for p in mp[nreg]:
+            ret.append(p)
+    return ret
+
+
+def get_filtered_cross_heuristic_from_arr(pos_perms, img, k=1):
+    mp = {}
+    lst = set()
+    # dictionary from int to list of strings
+    for p in pos_perms:
+        arr = permute_img(img, p)
+        e_heuristic = edge_heuristic.cross_heuristic(arr)
+        lst.add(e_heuristic)
+        if e_heuristic not in mp:
+            mp[e_heuristic] = []
+        mp[e_heuristic].append(p)
+    lst = list(lst)
+    lst.sort()
+    ret = []
+    for i in range(min(k, len(lst))):
         # which region # to use
         nreg = lst[i]
         for p in mp[nreg]:

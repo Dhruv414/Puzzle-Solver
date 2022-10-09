@@ -9,7 +9,7 @@ def l2norm(pix1, pix2):
     return math.sqrt(tot)
 
 
-def edge4_heuristic(img_arr, distance_formula=l2norm):
+def cross_heuristic(img_arr, distance_formula=l2norm):
     # we want to split into 4 sub images corresponding to each square
     # calculate the difference of the edges of all connected edges
     # if two images, a and b, calculate according to formula: (RGB(a) - RGB(b))^2

@@ -24,38 +24,49 @@ class Predictor:
     This class should stay named as `Predictor`
     """
 
-    def __init__(self):
-        """
-        Initializes any variables to be used when making predictions
-        """
-        self.model = load_model('example_model.h5')
-
-
     def make_prediction(self, img_path):
-        LOWER_BOUND = 5000
         arr = utils._img_to_array(img_path)
 
-        ve = utils.permute_all(arr)
         pos = utils.get_filtered_permutations(arr, 2)
-        print(pos)
-        v = [0] * len(pos)
-        for h in range(len(pos)):
-            fl = utils.permute_img(arr, pos[h])
-            c = edge_heuristic.edge4_heuristic(fl)
-            print(c)
-            if c <= LOWER_BOUND:
-                v[h] = sys.maxsize
+        g = 5
+        i = 0
+        while len(pos) != 1 and i <= 8:
+            print(pos)
+            pas = []
+            if i % 2 == 0:
+                pas = utils.get_filtered_permutations_from_arr(pos, arr, K=g)
             else:
-                v[h] = c
+                pas = utils.get_filtered_cross_heuristic_from_arr(pos, arr, k=g)
 
+            if not len(pas):
+                # pick lower edge score
+                # dont get raw number
+                scores = np.array([edge_heuristic.cross_heuristic(utils.permute_img(arr, pos[x])) for x in range(len(pos))])
+                pos = [pos[np.argmin(scores)]]
 
-        # print(utils.get_number_regions(arr, TOLERANCE=20000))
+                print(pos)
 
-        perm_arr = utils.permute_img(arr, pos[np.argmin(v)])
+                break
+            i += 1
+            g -= 1
+            pos = pas
+
+        # v = [0] * len(pos)
+        # for h in range(len(pos)):
+        #     fl = utils.permute_img(arr, pos[h])
+        #     c = edge_heuristic.cross_heuristic(fl)
+        #     print(c)
+        #     if c <= LOWER_BOUND:
+        #         v[h] = sys.maxsize
+        #     else:
+        #         v[h] = c
+        #
+        perm_arr = utils.permute_img(arr, pos[0])
+
         perm_img = Image.fromarray((perm_arr * 255).astype(np.uint8))
 
         perm_img.show()
-        return pos[np.argmin(v)]
+        return pos[0]
 
 
 # Example main function for testing/development
@@ -67,7 +78,7 @@ if __name__ == '__main__':
     LIMIT = 30
     SHOULD_STOP = True
 
-    for img_name in glob('images/*'):
+    for img_name in glob('1302/*'):
         if i == LIMIT and SHOULD_STOP:
             break
         predictor = Predictor()
