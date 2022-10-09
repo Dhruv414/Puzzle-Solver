@@ -27,45 +27,35 @@ class Predictor:
     def make_prediction(self, img_path):
         arr = utils._img_to_array(img_path)
 
-        pos = utils.get_filtered_permutations(arr, 2)
+        lower_bound = 4600
+        img_permute_arr = {}
+        for permutation in utils.permutations:
+            img_permute_arr[permutation] = utils.permute_img(arr, permutation)
+
+        pos = utils.get_filtered_permutations_from_arr(img_permute_arr, arr, k=5)
         g = 5
         i = 0
-        while len(pos) != 1 and i <= 8:
-            print(pos)
+        while len(pos) != 1 and i <= 5:
             pas = []
             if i % 2 == 0:
-                pas = utils.get_filtered_permutations_from_arr(pos, arr, K=g)
+                pas = utils.get_filtered_permutations_from_arr(img_permute_arr, arr, k=g, tolerance=850, perms=pos)
             else:
-                pas = utils.get_filtered_cross_heuristic_from_arr(pos, arr, k=g)
+                pas = utils.get_filtered_cross_heuristic_from_arr(img_permute_arr, pos, arr, k=g)
 
             if not len(pas):
-                # pick lower edge score
-                # dont get raw number
-                scores = np.array([edge_heuristic.cross_heuristic(utils.permute_img(arr, pos[x])) for x in range(len(pos))])
+                scores = np.array([edge_heuristic.cross_heuristic(img_permute_arr[pos[0]]) for x in range(len(pos))])
                 pos = [pos[np.argmin(scores)]]
-
-                print(pos)
-
                 break
             i += 1
             g -= 1
             pos = pas
 
-        # v = [0] * len(pos)
-        # for h in range(len(pos)):
-        #     fl = utils.permute_img(arr, pos[h])
-        #     c = edge_heuristic.cross_heuristic(fl)
-        #     print(c)
-        #     if c <= LOWER_BOUND:
-        #         v[h] = sys.maxsize
-        #     else:
-        #         v[h] = c
-        #
-        perm_arr = utils.permute_img(arr, pos[0])
+        # perm_arr = img_permute_arr[pos[0]]
 
-        perm_img = Image.fromarray((perm_arr * 255).astype(np.uint8))
+        # perm_img = Image.fromarray((perm_arr * 255).astype(np.uint8))
 
-        perm_img.show()
+        # perm_img.show()
+        utils.number_regions = {}
         return pos[0]
 
 
@@ -74,9 +64,9 @@ class Predictor:
 if __name__ == '__main__':
     i = 0
     g = 0
-    ANS = "1302"
-    LIMIT = 30
-    SHOULD_STOP = True
+    ANS = "2031"
+    LIMIT = 5
+    SHOULD_STOP = False
 
     for img_name in glob('1302/*'):
         if i == LIMIT and SHOULD_STOP:
